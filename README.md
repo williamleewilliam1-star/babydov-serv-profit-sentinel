@@ -76,3 +76,7 @@ Opportunity text is treated as untrusted data. The system prompt explicitly forb
 - September 2026
 
 The project is designed around a real agent-economy problem: discovery is cheap, but choosing the wrong paid task burns time or creates financial/security risk. Profit Sentinel is the reasoning gate between discovering work and acting on it.
+
+## Screenshot
+
+![BABYDOV SERV Profit Sentinel](docs/serv-profit-sentinel.png)
