@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Evidence-first paid-work triage powered by OpenServ SERV Reasoning.">
+  <title>BABYDOV SERV Profit Sentinel</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">B</span>
+        <div>
+          <strong>BABYDOV</strong>
+          <small>SERV Profit Sentinel</small>
+        </div>
+      </div>
+      <div class="live"><span></span> OpenServ SERV Reasoning</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="eyebrow">PAID-WORK INTELLIGENCE</p>
+        <h1>Know which opportunity is worth your next hour.</h1>
+        <p class="lede">Turn a noisy bounty, freelance task or agent job into an evidence-first GO / HOLD / DECLINE decision.</p>
+      </div>
+      <div class="stat">
+        <span>Decision model</span>
+        <strong>EV + evidence</strong>
+        <small>Reward · time · certainty · cost · risk</small>
+      </div>
+    </section>
+    <section class="grid">
+      <form id="opportunity-form" class="panel form-panel">
+        <div class="panel-head">
+          <div><p class="eyebrow">INPUT</p><h2>Opportunity</h2></div>
+          <button class="ghost" type="button" id="load-sample">Load demo</button>
+        </div>
+        <label>Title<input id="title" required maxlength="300"></label>
+        <div class="two">
+          <label>Source<input id="source" maxlength="200"></label>
+          <label>Deadline<input id="deadline" maxlength="120"></label>
+        </div>
+        <div class="three">
+          <label>Reward<input id="reward" type="number" step="0.01" min="0"></label>
+          <label>Currency<input id="currency" maxlength="40"></label>
+          <label>Start cost<input id="cost" type="number" step="0.01" min="0"></label>
+        </div>
+        <label>Description<textarea id="description" rows="7" maxlength="6000"></textarea></label>
+        <label>Public URL<input id="url" type="url"></label>
+        <button class="primary" id="analyze" type="submit">
+          <span>Run SERV decision</span><span class="arrow">→</span>
+        </button>
+        <p class="fine">The key stays server-side. Submitted text is evaluated as untrusted opportunity data.</p>
+      </form>
+
+      <section class="panel result-panel" id="result-panel">
+        <div class="empty" id="empty-state">
+          <div class="orb"></div>
+          <p class="eyebrow">OUTPUT</p>
+          <h2>Waiting for a signal</h2>
+          <p>Run an opportunity to generate an auditable decision slip.</p>
+        </div>
+        <div class="result hidden" id="result">
+          <div class="result-top">
+            <div><p class="eyebrow">SERV DECISION</p><div class="verdict" id="verdict">HOLD</div></div>
+            <div class="score-wrap"><strong id="score">0</strong><span>/100</span></div>
+          </div>
+          <div class="metrics">
+            <div><span>Expected value</span><strong id="ev">—</strong></div>
+            <div><span>Confidence</span><strong id="confidence">—</strong></div>
+            <div><span>Time</span><strong id="time">—</strong></div>
+          </div>
+          <div class="next">
+            <span>NEXT ACTION</span>
+            <strong id="next-action">—</strong>
+          </div>
+          <div class="explain"><span>WHY</span><p id="rationale"></p></div>
+          <div class="lists">
+            <div><span>BLOCKERS</span><ul id="blockers"></ul></div>
+            <div><span>EVIDENCE NEEDED</span><ul id="evidence"></ul></div>
+            <div><span>RISK FLAGS</span><ul id="risks"></ul></div>
+          </div>
+          <footer class="receipt">
+            <span id="provider">OpenServ SERV Reasoning</span>
+            <code id="request-id">request: —</code>
+          </footer>
+        </div>
+        <div class="loading hidden" id="loading">
+          <div class="spinner"></div>
+          <p>Reasoning across value, evidence and risk…</p>
+        </div>
+      </section>
+    </section>
+
+    <footer class="site-footer">
+      <span>Built for SERV Hackathon · Open Track</span>
+      <span>Evidence first. No payout promises.</span>
+    </footer>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
