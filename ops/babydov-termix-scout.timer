@@ -1,0 +1,12 @@
+[Unit]
+Description=Run BABYDOV TermiX scout every 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+RandomizedDelaySec=15s
+Persistent=true
+Unit=babydov-termix-scout.service
+
+[Install]
+WantedBy=timers.target
