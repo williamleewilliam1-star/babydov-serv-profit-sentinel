@@ -27,6 +27,17 @@ function budgetMax(item) {
   return Number.isFinite(value) ? value : 0;
 }
 
+export function isQuoteable(item, now = Date.now()) {
+  if (!item || typeof item !== "object" || !["OPEN", "QUOTED"].includes(item.status)) return false;
+  if (item.acceptedOfferId || item.checkoutOrderId) return false;
+  if (item.deadlineAt != null) {
+    if (typeof item.deadlineAt !== "string" || !/(Z|[+-]\d{2}:\d{2})$/.test(item.deadlineAt)) return false;
+    const deadline = Date.parse(item.deadlineAt);
+    if (!Number.isFinite(deadline) || deadline <= now) return false;
+  }
+  return true;
+}
+
 export function triageTermixRequest(item) {
   const text = coreText(item);
   const risks = HARD_RISK.filter((rule) => rule.test(text)).map((rule) => rule.source);
@@ -44,18 +55,18 @@ export function triageTermixRequest(item) {
   score -= Math.min(18, quotes * 5);
   score -= risks.length * 50;
   if (fitHits === 0) score -= 25;
-  if (item.status !== "OPEN") score -= 60;
+  if (!isQuoteable(item)) score -= 60;
   score = Math.max(0, Math.min(100, Math.round(score)));
 
-  const verdict = risks.length ? "DECLINE" : fitHits > 0 && score >= 65 ? "GO" : score >= 45 ? "HOLD" : "DECLINE";
-  return { verdict, score, reward, quotes, risks, fitHits, item };
+  const verdict = !isQuoteable(item) || risks.length ? "DECLINE" : fitHits > 0 && score >= 65 ? "GO" : score >= 45 ? "HOLD" : "DECLINE";
+  return { verdict, score, reward, quotes, risks, fitHits, item, paymentVerified: false, executionAuthorized: false };
 }
 
 async function fetchPage(page, pageSize = 100) {
   const url = new URL("/api/v1/prepayment-orders/discover", TERMIX_BASE);
   url.searchParams.set("page", String(page));
   url.searchParams.set("pageSize", String(pageSize));
-  const response = await fetch(url, { headers: { accept: "application/json" } });
+  const response = await fetch(url, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error(`TermiX discover failed (${response.status})`);
   return response.json();
 }
@@ -64,17 +75,20 @@ export async function scanTermix() {
   const first = await fetchPage(1);
   const pages = [first];
   const totalPages = Number(first.totalPages || 1);
+  if (!Number.isInteger(totalPages) || totalPages < 1 || totalPages > 50) throw new Error("Invalid pagination limit");
   for (let page = 2; page <= totalPages; page += 1) {
     pages.push(await fetchPage(page));
   }
   const items = pages.flatMap((page) => page.items || []);
   const triaged = items.map(triageTermixRequest).sort((a, b) => b.score - a.score);
-  const open = triaged.filter((row) => row.item.status === "OPEN");
+  const open = triaged.filter((row) => isQuoteable(row.item));
   return {
     fetchedAt: new Date().toISOString(),
     source: TERMIX_BASE,
     total: items.length,
-    open: open.length,
+    open: triaged.filter((row) => row.item.status === "OPEN").length,
+    quoteable: open.length,
+    decisionScope: "DISCOVERY_ONLY_NOT_PAYMENT_OR_WORK_AUTHORIZATION",
     go: open.filter((row) => row.verdict === "GO"),
     hold: open.filter((row) => row.verdict === "HOLD"),
     decline: open.filter((row) => row.verdict === "DECLINE")

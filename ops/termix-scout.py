@@ -41,6 +41,23 @@ def budget_max(item):
     except (TypeError, ValueError):
         return 0.0
 
+def is_quoteable(item, now=None):
+    if not isinstance(item, dict) or item.get("status") not in ("OPEN", "QUOTED"):
+        return False
+    if item.get("acceptedOfferId") or item.get("checkoutOrderId"):
+        return False
+    deadline = item.get("deadlineAt")
+    if deadline is not None:
+        if not isinstance(deadline, str):
+            return False
+        try:
+            parsed = datetime.fromisoformat(deadline.replace("Z", "+00:00"))
+            if parsed.tzinfo is None or parsed <= (now or datetime.now(timezone.utc)):
+                return False
+        except (ValueError, TypeError):
+            return False
+    return True
+
 def triage(item):
     text = " ".join(str(x) for x in (item.get("title"), item.get("scope")) if x)
     risks = [rule.pattern for rule in HARD_RISK if rule.search(text)]
@@ -52,10 +69,10 @@ def triage(item):
     score = 30 + min(35, reward / 3) + min(25, fit_hits * 10) - min(18, quotes * 5) - len(risks) * 50
     if fit_hits == 0:
         score -= 25
-    if item.get("status") != "OPEN":
+    if not is_quoteable(item):
         score -= 60
     score = max(0, min(100, round(score)))
-    if risks:
+    if not is_quoteable(item) or risks:
         verdict = "DECLINE"
     elif fit_hits > 0 and score >= 65:
         verdict = "GO"
@@ -65,6 +82,7 @@ def triage(item):
         verdict = "DECLINE"
     return {
         "verdict": verdict, "score": score, "reward": reward, "quotes": quotes,
+        "paymentVerified": False, "executionAuthorized": False,
         "risks": risks, "fitHits": fit_hits, "id": item.get("id"),
         "title": item.get("title"), "tags": item.get("tags") or [],
         "deadlineAt": item.get("deadlineAt"), "status": item.get("status"),
@@ -74,14 +92,18 @@ def scan():
     first = fetch_page(1)
     pages = [first]
     total_pages = int(first.get("totalPages") or 1)
+    if not 1 <= total_pages <= 50:
+        raise ValueError("Invalid pagination limit")
     for page in range(2, total_pages + 1):
         pages.append(fetch_page(page))
     items = [item for page in pages for item in page.get("items", [])]
     ranked = sorted((triage(item) for item in items), key=lambda row: row["score"], reverse=True)
-    open_rows = [row for row in ranked if row["status"] == "OPEN"]
+    eligible_ids = {item.get("id") for item in items if is_quoteable(item)}
+    open_rows = [row for row in ranked if row["id"] in eligible_ids]
     return {
         "fetchedAt": datetime.now(timezone.utc).isoformat(), "source": BASE,
-        "total": len(items), "open": len(open_rows),
+        "total": len(items), "open": sum(row["status"] == "OPEN" for row in ranked),
+        "quoteable": len(open_rows), "decisionScope": "DISCOVERY_ONLY_NOT_PAYMENT_OR_WORK_AUTHORIZATION",
         "go": [row for row in open_rows if row["verdict"] == "GO"],
         "hold": [row for row in open_rows if row["verdict"] == "HOLD"],
         "decline": [row for row in open_rows if row["verdict"] == "DECLINE"],
