@@ -1,0 +1,56 @@
+name: TermiX Scout CI
+
+on:
+  pull_request:
+    paths:
+      - "src/termix.js"
+      - "src/test-termix.js"
+      - "src/test-termix-quoteability.js"
+      - "ops/termix-scout.py"
+      - "ops/test-termix-quoteability.py"
+      - "tests/termix-quoteability.json"
+      - ".github/workflows/termix-scout-ci.yml"
+  push:
+    branches:
+      - termix-scout-v1
+    paths:
+      - "src/termix.js"
+      - "src/test-termix.js"
+      - "src/test-termix-quoteability.js"
+      - "ops/termix-scout.py"
+      - "ops/test-termix-quoteability.py"
+      - "tests/termix-quoteability.json"
+      - ".github/workflows/termix-scout-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Node triage tests
+        run: node src/test-termix.js
+
+      - name: Run Node quoteability tests
+        run: node src/test-termix-quoteability.js
+
+      - name: Run Python quoteability tests
+        run: python3 ops/test-termix-quoteability.py
+
+      - name: Compile Python scanner
+        run: python3 -m py_compile ops/termix-scout.py
