@@ -1,12 +1,14 @@
 {
   "name": "babydov-serv-profit-sentinel",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "SERV Reasoning-powered opportunity triage for paid agent work.",
   "scripts": {
     "start": "node src/server.js",
-    "test:serv": "node src/test-serv.js"
+    "test:serv": "node src/test-serv.js",
+    "test:termix": "node src/test-termix.js",
+    "termix:scan": "node src/termix.js"
   },
   "engines": {
     "node": ">=20"

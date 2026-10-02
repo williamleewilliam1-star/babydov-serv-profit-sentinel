@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { isQuoteable, triageTermixRequest } from "./termix.js";
+const cases = JSON.parse(fs.readFileSync(new URL("../tests/termix-quoteability.json", import.meta.url), "utf8"));
+for (const c of cases) assert.equal(isQuoteable(c.item, Date.parse("2026-10-02T00:00:00Z")), c.expected, c.name);
+const row = triageTermixRequest({id:"fixture",title:"Webhook API with tests",scope:"Webhook API with tests",status:"QUOTED",budget:{max:"80"},quoteCount:0});
+assert.notEqual(row.verdict, "DECLINE");
+assert.equal(row.paymentVerified, false);
+assert.equal(row.executionAuthorized, false);
+console.log(`PASS: ${cases.length} eligibility cases + 3 discovery-only assertions`);
