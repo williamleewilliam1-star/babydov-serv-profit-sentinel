@@ -21,6 +21,9 @@ HARD_RISK = [
     re.compile(r"\b(repost|pinned announcement|project feed)\b", re.I),
 ]
 
+UNVERIFIABLE_SCOPE = re.compile(r"^(?:devvil|tbd|n/?a|test|audit|hello|none|coming soon|placeholder|-)$", re.I)
+SPECULATIVE_WORK = re.compile(r"\b(?:airdrop|alpha hunter|yield farming|arbitrage bot|token launch)\b", re.I)
+
 STRONG_FIT = [
     re.compile(r"\b(code review|bugfix|test suite|docker|webhook|api)\b", re.I),
     re.compile(r"\b(research|data|scrape|json|csv|report|audit)\b", re.I),
@@ -63,6 +66,11 @@ def triage(item):
     risks = [rule.pattern for rule in HARD_RISK if rule.search(text)]
     if re.search(r"\bswap\b", text, re.I) and not re.search(r"\b(comparison|quote|slippage readout|simulate)\b", text, re.I):
         risks.append("swap-execution")
+    if SPECULATIVE_WORK.search(text):
+        risks.append("speculative-work")
+    scope = str(item.get("scope") or "").strip()
+    if len(scope) < 35 or UNVERIFIABLE_SCOPE.search(scope):
+        risks.append("underspecified-scope")
     fit_hits = sum(bool(rule.search(text)) for rule in STRONG_FIT)
     reward = budget_max(item)
     quotes = int(item.get("quoteCount") or 0)

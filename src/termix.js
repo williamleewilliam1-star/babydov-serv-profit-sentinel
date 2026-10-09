@@ -18,6 +18,9 @@ const STRONG_FIT = [
   /\bcomparison|slippage readout|simulate|analysis\b/i
 ];
 
+const UNVERIFIABLE_SCOPE = /^(?:devvil|tbd|n\/?a|test|audit|hello|none|coming soon|placeholder|-)$/i;
+const SPECULATIVE_WORK = /\b(?:airdrop|alpha hunter|yield farming|arbitrage bot|token launch)\b/i;
+
 function coreText(item) {
   return [item.title, item.scope].filter(Boolean).join(" ");
 }
@@ -45,6 +48,10 @@ export function triageTermixRequest(item) {
     risks.push("swap-execution");
   }
 
+  if (SPECULATIVE_WORK.test(text)) risks.push("speculative-work");
+  const scope = String(item?.scope || "").trim();
+  const underspecified = scope.length < 35 || UNVERIFIABLE_SCOPE.test(scope);
+  if (underspecified) risks.push("underspecified-scope");
   const fitHits = STRONG_FIT.filter((rule) => rule.test(text)).length;
   const reward = budgetMax(item);
   const quotes = Number(item.quoteCount || 0);
