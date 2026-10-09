@@ -9,7 +9,7 @@ spec.loader.exec_module(scout)
 cases = json.loads((root / "tests/termix-quoteability.json").read_text())
 for c in cases:
     assert scout.is_quoteable(c["item"], datetime(2026,10,2,tzinfo=timezone.utc)) == c["expected"], c["name"]
-row = scout.triage({"id":"fixture", "title":"Webhook API with tests", "scope":"Webhook API with tests", "status":"QUOTED", "budget":{"max":"80"}, "quoteCount":0})
+row = scout.triage({"id":"fixture", "title":"Webhook API with tests", "scope":"Build a webhook API with signature validation, replay protection, and integration tests for delivery failures", "status":"QUOTED", "budget":{"max":"80"}, "quoteCount":0})
 assert row["verdict"] != "DECLINE"
 assert row["paymentVerified"] is False
 assert row["executionAuthorized"] is False
