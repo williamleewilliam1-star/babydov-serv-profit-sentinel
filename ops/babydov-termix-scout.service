@@ -1,0 +1,21 @@
+[Unit]
+Description=BABYDOV TermiX read-only opportunity scout
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/babydov-termix-scout
+ExecStart=/usr/bin/python3 /opt/babydov-termix-scout/scan.py
+Environment=TERMIX_SCOUT_OUT=/opt/babydov-termix-scout/state/latest.json
+Nice=10
+MemoryMax=128M
+CPUQuota=20%
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/babydov-termix-scout/state
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true

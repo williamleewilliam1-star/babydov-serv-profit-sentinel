@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { analyzeOpportunity, MODEL } from "./serv.js";
+import { scanTermix } from "./termix.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "..", "public");
@@ -56,6 +57,11 @@ const server = http.createServer(async (req, res) => {
         provider: "OpenServ SERV Reasoning",
         model: MODEL
       });
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/termix/scan") {
+      const result = await scanTermix();
+      return sendJson(res, 200, result);
     }
 
     if (req.method === "POST" && url.pathname === "/api/analyze") {

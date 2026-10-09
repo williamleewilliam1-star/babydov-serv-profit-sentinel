@@ -1,0 +1,132 @@
+[
+  {
+    "name": "status-OPEN",
+    "item": {
+      "status": "OPEN"
+    },
+    "expected": true
+  },
+  {
+    "name": "status-QUOTED",
+    "item": {
+      "status": "QUOTED"
+    },
+    "expected": true
+  },
+  {
+    "name": "status-FUNDED",
+    "item": {
+      "status": "FUNDED"
+    },
+    "expected": false
+  },
+  {
+    "name": "status-ACCEPTED",
+    "item": {
+      "status": "ACCEPTED"
+    },
+    "expected": false
+  },
+  {
+    "name": "status-CLOSED",
+    "item": {
+      "status": "CLOSED"
+    },
+    "expected": false
+  },
+  {
+    "name": "status-EXPIRED",
+    "item": {
+      "status": "EXPIRED"
+    },
+    "expected": false
+  },
+  {
+    "name": "status-CANCELLED",
+    "item": {
+      "status": "CANCELLED"
+    },
+    "expected": false
+  },
+  {
+    "name": "status-UNKNOWN",
+    "item": {
+      "status": "UNKNOWN"
+    },
+    "expected": false
+  },
+  {
+    "name": "already-accepted",
+    "item": {
+      "status": "QUOTED",
+      "acceptedOfferId": "existing-offer"
+    },
+    "expected": false
+  },
+  {
+    "name": "checkout-exists",
+    "item": {
+      "status": "QUOTED",
+      "checkoutOrderId": "existing-checkout"
+    },
+    "expected": false
+  },
+  {
+    "name": "past-deadline",
+    "item": {
+      "status": "QUOTED",
+      "deadlineAt": "2026-10-01T00:00:00Z"
+    },
+    "expected": false
+  },
+  {
+    "name": "future-deadline",
+    "item": {
+      "status": "QUOTED",
+      "deadlineAt": "2026-10-03T00:00:00Z"
+    },
+    "expected": true
+  },
+  {
+    "name": "equal-deadline",
+    "item": {
+      "status": "QUOTED",
+      "deadlineAt": "2026-10-02T00:00:00Z"
+    },
+    "expected": false
+  },
+  {
+    "name": "invalid-deadline",
+    "item": {
+      "status": "QUOTED",
+      "deadlineAt": "not-a-date"
+    },
+    "expected": false
+  },
+  {
+    "name": "missing-timezone",
+    "item": {
+      "status": "QUOTED",
+      "deadlineAt": "2026-10-03T00:00:00"
+    },
+    "expected": false
+  },
+  {
+    "name": "numeric-deadline",
+    "item": {
+      "status": "QUOTED",
+      "deadlineAt": 1791072000000
+    },
+    "expected": false
+  },
+  {
+    "name": "missing-status",
+    "item": {},
+    "expected": false
+  },
+  {
+    "name": "null-item",
+    "item": null,
+    "expected": false
+  }
+]
