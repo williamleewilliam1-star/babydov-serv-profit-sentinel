@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { assessIssue, parseIssueUrl, checkIssue } from './bounty-verify.js';
+assert.deepEqual(parseIssueUrl('https://github.com/demo/project/issues/183'), {owner:'demo',repo:'project',number:183});
+for(const bad of ['http://github.com/demo/project/issues/1','https://evil.com/demo/project/issues/1','https://github.com/demo/project/pull/1']) assert.throws(()=>parseIssueUrl(bad));
+const base={html_url:'https://github.com/demo/project/issues/1',state:'open',assignees:[],repository:{archived:false}};
+assert.equal(assessIssue(base).verdict,'REVIEW');
+assert.equal(assessIssue({...base,state:'closed'}).verdict,'DECLINE');
+assert.equal(assessIssue({...base,repository:{archived:true}}).verdict,'DECLINE');
+assert.equal(assessIssue({...base,assignees:[{login:'someone'}]}).verdict,'HOLD');
+assert.equal(assessIssue(base).fundingVerified,false);
+const reader=(endpoint)=> endpoint.endsWith('/issues/1')?base:{archived:false};
+assert.equal(checkIssue(base.html_url,reader).verdict,'REVIEW');
+assert.throws(()=>checkIssue(base.html_url,(path)=>path.endsWith('/issues/1')?{...base,pull_request:{}}:{archived:false}));
+console.log('Bounty source-state tests: PASS (10 assertions)');
