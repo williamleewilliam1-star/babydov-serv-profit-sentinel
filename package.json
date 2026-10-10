@@ -8,7 +8,9 @@
     "start": "node src/server.js",
     "test:serv": "node src/test-serv.js",
     "test:termix": "node src/test-termix.js",
-    "termix:scan": "node src/termix.js"
+    "termix:scan": "node src/termix.js",
+    "test": "npm run test:serv && npm run test:termix && npm run test:termix:python",
+    "test:termix:python": "python3 ops/test-termix-quoteability.py"
   },
   "engines": {
     "node": ">=20"
